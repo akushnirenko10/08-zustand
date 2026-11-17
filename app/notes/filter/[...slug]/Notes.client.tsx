@@ -2,8 +2,6 @@
 
 import Error from "@/components/Error/Error";
 import Loader from "@/components/Loader/Loader";
-import Modal from "@/components/Modal/Modal";
-import NoteForm from "@/components/NoteForm/NoteForm";
 import NoteList from "@/components/NoteList/NoteList";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBox from "@/components/SearchBox/SearchBox";
@@ -12,6 +10,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import css from "./NotePage.module.css";
+import Link from "next/link";
 
 interface NotesClientProps {
   tag?: string;
@@ -20,7 +19,6 @@ interface NotesClientProps {
 export default function NotesClient({ tag }: NotesClientProps) {
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["notes", query, currentPage, tag],
@@ -31,9 +29,6 @@ export default function NotesClient({ tag }: NotesClientProps) {
 
   const notes = data?.notes ?? [];
   const totalPages = data?.totalPages ?? 0;
-
-  const openModal = () => setIsOpenModal(true);
-  const closeModal = () => setIsOpenModal(false);
 
   const handleSearch = useDebouncedCallback((query) => {
     setQuery(query);
@@ -51,18 +46,13 @@ export default function NotesClient({ tag }: NotesClientProps) {
             onPageChange={setCurrentPage}
           />
         )}
-        <button className={css.button} onClick={openModal}>
+        <Link href="/notes/action/create" className={css.button}>
           Create note +
-        </button>
+        </Link>
       </header>
       {notes.length > 0 && <NoteList notes={notes} />}
       {isLoading && <Loader />}
       {isError && <Error />}
-      {isOpenModal && (
-        <Modal closeModal={closeModal}>
-          <NoteForm closeModal={closeModal} />
-        </Modal>
-      )}
     </div>
   );
 }
